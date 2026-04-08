@@ -44,7 +44,8 @@ class RabbitMQConnection {
       await this.channel.assertQueue(dlqName, { durable: true }); // create a dead-letter queue with the name `${queueName}_dlq`
 
       // configure the main queue to use the dead-letter queue for failed messages
-      await this.channel.assertQueue(config.rabbitmq.queue, {
+      const queueName = config.rabbitmq.queue; // main queue name
+      await this.channel.assertQueue(queueName, {
         durable: true,
         arguments: {
           "x-dead-letter-exchange": "",

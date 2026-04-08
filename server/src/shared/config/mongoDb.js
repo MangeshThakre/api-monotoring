@@ -21,10 +21,12 @@ class MongoConnection {
         logger.info("already connected to mongodb");
         return this.connection;
       }
-      this.connection = await mongoose.connect(
-        config.mongo.uri,
-        config.mongo.dbName
-      );
+      await mongoose.connect(config.mongo.uri, {
+        dbName: config.mongo.dbName
+      });
+
+      this.connection = mongoose.connection;
+
       logger.info("connected to mongodb", this.connection);
       return this.connection;
     } catch (error) {

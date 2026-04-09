@@ -1,4 +1,4 @@
-import rabbitmq from "./rabbitmq.js";
+import amqp from "amqplib";
 import logger from "./logger.js";
 import config from "./index.js";
 
@@ -35,8 +35,9 @@ class RabbitMQConnection {
     try {
       this.isConnecting = true;
 
-      logger.info("connecting to rabbitmq...", config.rabbitmq.url);
-      this.connection = await rabbitmq.connect(config.rabbitmq.url); // connect to rabbitmq server
+      logger.info("connecting to rabbitmq...");
+
+      this.connection = await amqp.connect(config.rabbitmq.url); // connect to rabbitmq server
       this.channel = await this.connection.createChannel(); // create a channel
 
       // setup a dead-letter queue for failed messages
@@ -53,7 +54,9 @@ class RabbitMQConnection {
         }
       });
 
-      logger.info("rabbit mq connect to the queue", config.rabbitmq.queue);
+      logger.info("rabbit mq connect to the queue", {
+        queue: config.rabbitmq.queue
+      });
 
       // handle connection close and errors
       this.connection.on("close", () => {
@@ -72,7 +75,7 @@ class RabbitMQConnection {
       this.isConnecting = false;
       return this.channel;
     } catch (error) {
-      logger.error("error connecting to rabbitmq", error);
+      logger.error("error connecting to rabbitmq:", error);
       this.isConnecting = false;
       throw error;
     }
@@ -105,3 +108,5 @@ class RabbitMQConnection {
     }
   }
 }
+
+export default new RabbitMQConnection();

@@ -27,7 +27,7 @@ class MongoConnection {
 
       this.connection = mongoose.connection;
 
-      logger.info("connected to mongodb", this.connection);
+      logger.info("connected to mongodb");
       return this.connection;
     } catch (error) {
       logger.error("error connection to the mongodb", error);
@@ -58,4 +58,4 @@ class MongoConnection {
   }
 }
 
-export default MongoConnection;
+export default new MongoConnection();

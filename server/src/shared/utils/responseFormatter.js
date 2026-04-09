@@ -1,4 +1,4 @@
-class ResponseFormate {
+class ResponseFormatter {
   static success(data, message = "success", statusCode = 200) {
     return {
       success: true,
@@ -43,4 +43,4 @@ class ResponseFormate {
   }
 }
 
-export default ResponseFormate;
+export default ResponseFormatter;

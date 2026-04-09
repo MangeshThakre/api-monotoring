@@ -1,54 +1,71 @@
-import postgres from "postgres";
+import pg from "pg";
 import config from "./index.js";
 import logger from "./logger.js";
 
-/****
- * PostgreSQL connection setup
- */
+const { Pool } = pg;
 
 class PostgresConnection {
   constructor() {
-    this.connection = null;
+    this.pool = null;
   }
 
-  async connect() {
-    try {
-      if (this.connection) {
-        logger.info("already connected to postgres");
-        return this.connection;
-      }
-      this.connection = postgres({
+  getPool() {
+    if (!this.pool) {
+      this.pool = new Pool({
         host: config.postgres.host,
         port: config.postgres.port,
         database: config.postgres.database,
         user: config.postgres.user,
-        password: config.postgres.password
+        password: config.postgres.password,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000
       });
-      logger.info("connected to postgres", this.connection);
-      return this.connection;
-    } catch (error) {
-      logger.error("error connecting to postgres", error);
+
+      this.pool.on("error", (err) => {
+        logger.error("Unexpected error on idle PG client", err);
+      });
+
+      logger.info("PG Pool Created");
     }
+    return this.pool;
   }
 
-  async disconnect() {
+  async testConnection() {
     try {
-      if (this.connection) {
-        await this.connection.end();
-        logger.info("postgres disconnected");
-        this.connection = null;
-      }
+      const pool = this.getPool();
+      const client = await pool.connect();
+      const result = await client.query("SELECT NOW()");
+      client.release();
+
+      logger.info(`PG connected successfully at ${result.rows[0].now}`);
     } catch (error) {
-      logger.error("failed to disconnecting from postgres", error);
+      logger.error("Failed to connect to PG", error);
+      throw error;
     }
   }
 
-  /**
-   * @return current postgres connection instance
-   */
-  async getConnection() {
-    return this.connection;
+  async query(text, params) {
+    const pool = this.getPool();
+    const start = Date.now();
+    try {
+      const result = await pool.query(text, params);
+      const duration = Date.now() - start;
+      logger.debug("Executed query", { text, duration, rows: result.rowCount });
+      return result;
+    } catch (error) {
+      logger.error("Query error:", { text, error: error.message });
+      throw error;
+    }
+  }
+
+  async close() {
+    if (this.pool) {
+      await this.pool.end();
+      this.pool = null;
+      logger.info("PG pool closed!");
+    }
   }
 }
 
-export default PostgresConnection;
+export default new PostgresConnection();

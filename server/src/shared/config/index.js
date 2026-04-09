@@ -22,7 +22,9 @@ const config = {
 
   // rabbitmq
   rabbitmq: {
-    url: process.env.RABBITMQ_URL || "amqp://localhost:5672",
+    url:
+      process.env.RABBITMQ_URL ||
+      "amqp://admin:admin123@localhost:5672/api_monitoring",
     queue: process.env.RABBITMQ_QUEUE || "api_monitoring_queue",
     publisherConfirms:
       process.env.RABBITMQ_PUBLISHER_CONFIRM === "true" || false,

@@ -4,6 +4,9 @@ import logger from "./logger.js";
 
 const { Pool } = pg;
 
+
+// follows design pattern - singleton
+
 class PostgresConnection {
   constructor() {
     this.pool = null;

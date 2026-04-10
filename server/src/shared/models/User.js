@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  Permissions: {
+  permissions: {
     canManageUsers: {
       type: Boolean,
       default: false
@@ -89,4 +89,5 @@ userSchema.pre("save", async function (next) {
 userSchema.index({ clientId: 1, isActive: 1 }); // create a compound index on clientId and email to enforce uniqueness
 userSchema.index({ role: 1 }); // index on role for faster queries by role
 const User = mongoose.model("User", userSchema);
+
 export default User;

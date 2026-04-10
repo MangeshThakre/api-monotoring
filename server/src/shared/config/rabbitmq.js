@@ -6,6 +6,9 @@ import config from "./index.js";
  * RabbitMQ connection setup
  */
 
+
+// follows design pattern - singleton
+
 class RabbitMQConnection {
   constructor() {
     this.connection = null;
@@ -35,7 +38,7 @@ class RabbitMQConnection {
     try {
       this.isConnecting = true;
 
-      logger.info("connecting to rabbitmq...");
+      logger.info("connecting to rabbitmq...", { url: config.rabbitmq.url });
 
       this.connection = await amqp.connect(config.rabbitmq.url); // connect to rabbitmq server
       this.channel = await this.connection.createChannel(); // create a channel
@@ -54,7 +57,7 @@ class RabbitMQConnection {
         }
       });
 
-      logger.info("rabbit mq connect to the queue", {
+      logger.info("rabbitMQ connect to the queue", {
         queue: config.rabbitmq.queue
       });
 

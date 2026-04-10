@@ -2,10 +2,12 @@ import mongoose from "mongoose";
 import config from "./index.js";
 import logger from "./logger.js";
 
+
 /****
  * MongoDB connection setup
  */
 
+// follows design pattern - singleton
 class MongoConnection {
   constructor() {
     this.connection = null;
@@ -21,16 +23,19 @@ class MongoConnection {
         logger.info("already connected to mongodb");
         return this.connection;
       }
+
+      logger.info("connecting to mongodb...");
       await mongoose.connect(config.mongo.uri, {
         dbName: config.mongo.dbName
       });
-
       this.connection = mongoose.connection;
-
-      logger.info("connected to mongodb");
+      logger.info("connected to mongodb", { url: config.mongo.uri });
       return this.connection;
     } catch (error) {
-      logger.error("error connection to the mongodb", error);
+      logger.error("error connection to the mongodb", {
+        url: config.mongo.uri,
+        error
+      });
     }
   }
 
@@ -59,3 +64,5 @@ class MongoConnection {
 }
 
 export default new MongoConnection();
+
+

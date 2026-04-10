@@ -1,4 +1,3 @@
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -40,7 +39,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin123
-      RABBITMQ_DEFAULT_VHOST: api_monitoring
+      RABBITMQ_DEFAULT_VHOST: api_monitoring_vhost
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -70,6 +69,42 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+
+  # api-app:
+  #   build:
+  #     context: .
+  #     dockerfile: DockerFile
+  #   container_name: api-monitoring-app
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #   # postgres
+  #     POSTGRES_HOST: postgres
+  #     POSTGRES_PORT: 5432
+  #     POSTGRES_DB: api_monitoring
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #     # rabbitmq
+  #     RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/api_monitoring_vhost
+  #     RABBITMQ_VHOST: api_monitoring_vhost
+  #     RABBITMQ_HOST: rabbitmq
+  #     RABBITMQ_PORT: 5672
+  #     RABBITMQ_USER: admin
+  #     RABBITMQ_PASSWORD: admin123
+  #     # mongodb
+  #     MONGO_DB_URL: mongodb://mongo:27017
+  #     MONGO_DB_NAME: api-monitoring
+  #     MONGO_HOST: mongo
+  #     MONGO_PORT: 27017
+  #   networks:
+  #     - api-monitoring-network
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - postgres
+  #     - rabbitmq
+  #     - mongo
+  #   volumes:
+  #     - ./logs:/app/logs
 
 volumes:
   postgres_data:

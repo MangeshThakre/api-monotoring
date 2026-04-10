@@ -4,15 +4,16 @@ dotenv.config();
 
 const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
-  PORT: process.env.PORT || 3000,
+  PORT: process.env.PORT || 8081,
 
   //   mongoDB:
   mongo: {
-    uri: process.env.MONGO_DB_URL || "mongodb://localhost:27017/api-monitoring",
+    uri: process.env.MONGO_DB_URL || "mongodb://localhost:27017",
     dbName: process.env.MONGO_DB_NAME || "api-monitoring"
   },
   // postgres
   postgres: {
+    uri: process.env.POSTGRES_DB_URL,
     host: process.env.POSTGRES_HOST || "localhost",
     port: process.env.POSTGRES_PORT || 5432,
     database: process.env.POSTGRES_DB || "api_monitoring",
@@ -24,7 +25,8 @@ const config = {
   rabbitmq: {
     url:
       process.env.RABBITMQ_URL ||
-      "amqp://admin:admin123@localhost:5672/api_monitoring",
+      "amqp://admin:admin123@localhost:5672/api_monitoring_vhost", // rabbitmq docker url
+    vHost: process.env.RABBITMQ_VHOST || "api_monitoring_vhost",
     queue: process.env.RABBITMQ_QUEUE || "api_monitoring_queue",
     publisherConfirms:
       process.env.RABBITMQ_PUBLISHER_CONFIRM === "true" || false,

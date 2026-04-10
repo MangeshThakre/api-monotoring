@@ -46,8 +46,8 @@ async function initializeConnections() {
   logger.info("Initializing database and message queue connections...");
   try {
     await MongoConnection.connect(); // Connect to MongoDB
-    await RabbitMQConnection.connect(); // Connect to RabbitMQ
     await PostgresConnection.testConnection(); // Test PostgreSQL connection
+    await RabbitMQConnection.connect(); // Connect to RabbitMQ
     logger.info("All connections initialized successfully");
   } catch (error) {
     logger.error("Error initializing connections", { error: error.message });
@@ -95,7 +95,10 @@ async function startServer() {
     });
 
     process.on("unhandledRejection", (reason, promise) => {
-      logger.error("Unhandled Rejection at:", promise, "reason:", reason);
+      logger.error("Unhandled Rejection at:", {
+        promise: promise,
+        "reason:": reason
+      });
       gracefulShutdown("unhandledRejection");
     });
   } catch (error) {

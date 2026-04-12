@@ -7,7 +7,10 @@ import MongoConnection from "./shared/config/mongoDb.js";
 import PostgresConnection from "./shared/config/postgres.js";
 import RabbitMQConnection from "./shared/config/rabbitmq.js";
 import errorHandler from "./shared/middleware/errorHandler.js";
-import ResponseFormatter from "./shared/utils/responseFormatter.js";
+import ResponseFormatter from "./shared/utils/ResponseFormatter.js";
+import cookieParser from "cookie-parser";
+//router
+import authRouter from "./services/auth/router/authRouter.js";
 
 const app = express();
 
@@ -15,7 +18,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
-app.use(cors());
+
+app.use(cors({ credentials: true }));
+
+app.use(cookieParser());
 
 // logger middleware for incoming requests
 app.use((req, res, next) => {
@@ -37,6 +43,7 @@ app.get("/health", (req, res) => {
   );
 });
 
+app.use("/api/auth/", authRouter);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json(ResponseFormatter.error("Endpoint not found", 404));

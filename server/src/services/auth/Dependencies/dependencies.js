@@ -4,15 +4,15 @@ import MongoUserRepository from "../repository/UserRepository.js";
 
 class Container {
   static init() {
-    repositories = {
-      userRepository: MongoUserRepository
+    const repositories = {
+      userRepository: new MongoUserRepository()
     };
 
-    services = {
+    const services = {
       authService: new AuthServer(repositories.userRepository)
     };
 
-    controller = {
+    const controller = {
       authController: new AuthController(services.authService)
     };
     return {

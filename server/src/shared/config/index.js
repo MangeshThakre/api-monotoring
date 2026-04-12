@@ -44,7 +44,8 @@ const config = {
   ratelimiter: {
     windowMs: parseInt(process.env.RATE_LIMITER_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
     max: parseInt(process.env.RATE_LIMITER_MAX) || 1000 // limit each IP to 1000 requests per windowMs
-  }
+  },
+  cookie: {}
 };
 
 export default config;

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { use } from "react";
 
 const userSchema = new mongoose.Schema({
   userName: {

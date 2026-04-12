@@ -22,16 +22,16 @@ services:
       retries: 5
       start_period: 30s
 
-  mongo:
-    image: mongo:6.0
-    container_name: api-monitoring-mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - api-monitoring-network
-    restart: unless-stopped
+  # mongo:
+  #   image: mongo:6.0
+  #   container_name: api-monitoring-mongo
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo_data:/data/db
+  #   networks:
+  #     - api-monitoring-network
+  #   restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3-management-alpine

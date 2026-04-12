@@ -10,8 +10,8 @@ class MongoUserRepository extends BaseRepository {
   async create(userData) {
     try {
       let data = { ...userData };
-      if ((data.role === "super_Admin") & !permission) {
-        data.permission = {
+      if ((data.role === "super_admin") & !data.permissions) {
+        data.permissions = {
           canManageUsers: true,
           canCreateApiKeys: true,
           canViewAnalytics: true,
@@ -21,6 +21,7 @@ class MongoUserRepository extends BaseRepository {
       const user = new this.modal(data);
       await user.save();
       logger.info("user create successfully..");
+      return user;
     } catch (error) {
       logger.error("Error creating user", error);
       throw error;

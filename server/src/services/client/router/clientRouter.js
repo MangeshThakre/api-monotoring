@@ -11,4 +11,12 @@ clientRouter.post("/admin/client/onboard", (req, res, next) =>
   clientController.createClient(req, res, next)
 );
 
+clientRouter.post("/admin/client/:clientId/users", (req, res, next) =>
+  clientController.createClientUser(req, res, next)
+);
+
+clientRouter.post("/admin/client/:clientId/api/key", (req, res, next) => {
+  clientController.createApiKey(req, res, next);
+});
+
 export default clientRouter;

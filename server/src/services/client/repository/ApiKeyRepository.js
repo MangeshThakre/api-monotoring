@@ -13,7 +13,7 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
    */
   async create(apiKeyData) {
     try {
-      const apiKey = this.modal.create(apiKeyData);
+      const apiKey = new this.modal(apiKeyData);
       await apiKey.save();
       logger.info("ApiKey created successfully");
       return apiKey;

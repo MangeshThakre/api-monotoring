@@ -34,6 +34,8 @@ export default class ClientController {
     }
   }
 
+  // SUPER_ADMIN can create users for any client.
+  // CLIENT_ADMIN can create users only for their own client.
   async createClientUser(req, res, next) {
     try {
       const { clientId } = req.params;
@@ -71,6 +73,21 @@ export default class ClientController {
         );
     } catch (error) {
       logger.error("Error creating apiKeys :  clientController", error);
+      res
+        .status(400)
+        .json(ResponseFormatter.error(error.message, error.statusCode));
+    }
+  }
+
+  async getClientApiKeys(req, res, next) {
+    try {
+      const { clientId } = req.params;
+      const apiKeys = await this.ClientService.getClientApikeys(clientId);
+      return res
+        .status(200)
+        .json(ResponseFormatter.success(apiKeys, "Successfully get api keys"));
+    } catch (error) {
+      logger.error("Error getting ApiKeys: clientController");
       res
         .status(400)
         .json(ResponseFormatter.error(error.message, error.statusCode));

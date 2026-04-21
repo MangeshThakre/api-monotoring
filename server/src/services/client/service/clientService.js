@@ -25,10 +25,17 @@ export default class ClientService {
   }
 
   canUserAccessClient(user, clientId) {
+    // SUPER_ADMIN can create users for any client.
+
     if (user.role === APPLICATION_ROLES.SUPER_ADMIN) {
       return true;
     }
-    return user.clientId && user.clientId.toString() === clientId.toString();
+
+    // CLIENT_ADMIN can create users only for their own client.
+    return (
+      user.role === APPLICATION_ROLES.CLIENT_ADMIN &&
+      user.clientId?.toString() === clientId.toString()
+    );
   }
 
   generateApiKey() {
@@ -65,7 +72,14 @@ export default class ClientService {
     }
   }
 
-  async createClientUser(clientId, userData, admin) {
+
+// | Role          | Same client | Other client |
+// | ------------- | ----------- | ------------ |
+// | SUPER_ADMIN   | ✅           | ✅         |
+// | CLIENT_ADMIN  | ✅           | ❌         |
+// | CLIENT_VIEWER | ❌           | ❌         |
+
+  async createClientUser(clientId, newUserData, admin) {
     try {
       if (!this.canUserAccessClient(admin, clientId)) {
         throw new AppError("Access denied", 400);
@@ -75,14 +89,13 @@ export default class ClientService {
         email,
         password,
         role = APPLICATION_ROLES.CLIENT_VIEWER
-      } = userData;
+      } = newUserData;
 
       if (!isValidClientRole(role)) {
         throw new AppError("Invalid role for client user", 400);
       }
 
       const client = await this.ClientRepository.findById(clientId);
-
       if (!client) {
         throw new AppError("Client not found", 404);
       }
@@ -166,6 +179,16 @@ export default class ClientService {
       return apiKey;
     } catch (error) {
       logger.error("Error creating apiKdy", error);
+      throw error;
+    }
+  }
+
+  async getClientApikeys(clientId) {
+    try {
+      const apiKeys = await this.ApiKeyRepository.findByClientId(clientId);
+      return apiKeys;
+    } catch (error) {
+      logger.error("Error getting apiKeys: clientServiceError", error);
       throw error;
     }
   }

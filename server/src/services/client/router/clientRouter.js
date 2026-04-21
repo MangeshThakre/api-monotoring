@@ -19,4 +19,8 @@ clientRouter.post("/admin/client/:clientId/api/key", (req, res, next) => {
   clientController.createApiKey(req, res, next);
 });
 
+clientRouter.get("/admin/client/:clientId/api/key", (req, res, next) => {
+  clientController.getClientApiKeys(req, res, next);
+});
+
 export default clientRouter;

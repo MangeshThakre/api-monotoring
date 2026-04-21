@@ -49,9 +49,11 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
    */
   async findByClientId(clientId) {
     try {
-      const apiKey = await this.modal.find(clientId).populate(clientId);
-      if (!apiKey) logger.warning("unable to find apiKey");
+      const apiKeys = await this.modal
+        .find({ clientId: clientId })
+        .populate("clientId");
       logger.info("apiKey by clientId got Successfully");
+      return apiKeys;
     } catch (error) {
       logger.error(
         "Error getting apiKey by clientId: apiKeyREpository:",

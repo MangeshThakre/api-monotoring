@@ -11,6 +11,7 @@ import ResponseFormatter from "./shared/utils/ResponseFormatter.js";
 import cookieParser from "cookie-parser";
 //router
 import authRouter from "./services/auth/router/authRouter.js";
+import clientRouter from "./services/client/router/clientRouter.js";
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth/", authRouter);
+app.use("/api", clientRouter);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json(ResponseFormatter.error("Endpoint not found", 404));

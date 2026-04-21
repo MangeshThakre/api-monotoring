@@ -117,4 +117,17 @@ export default class AuthService {
       throw error;
     }
   }
+
+  async checkSuperAdminPermission(userId) {
+    try {
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw new AppError("user not found", 404);
+      }
+      return user.role === "super_admin";
+    } catch (error) {
+      logger.error("");
+      throw error;
+    }
+  }
 }

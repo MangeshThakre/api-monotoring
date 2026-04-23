@@ -46,6 +46,7 @@ export class ConfirmChannelManager extends EventEmitter {
       const confirmChannel = await connection.createConfirmChannel();
 
       confirmChannel.on("drain", () => this.emit("drain"));
+
       confirmChannel.on("close", () => {
         this._logger.warn(
           "[channelManager] confirm channel closed unexpectedly"

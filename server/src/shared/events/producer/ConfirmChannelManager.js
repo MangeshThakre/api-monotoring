@@ -10,8 +10,8 @@ export class ConfirmChannelManager extends EventEmitter {
       );
     }
 
-    this.rabbitmq = rabbitmq;
-    this.logger = logger ?? console;
+    this._rabbitmq = rabbitmq;
+    this._logger = logger ?? console;
     this._channel = null;
     this._connecting = false;
     this._connectWaiting = [];
@@ -32,15 +32,15 @@ export class ConfirmChannelManager extends EventEmitter {
     try {
       let connection;
 
-      if (this.rabbitmq.connection) {
-        connection = this.rabbitmq.connection;
+      if (this._rabbitmq.connection) {
+        connection = this._rabbitmq.connection;
       } else {
-        await this.rabbitmq.connect();
+        await this._rabbitmq.connect();
 
-        if (!this.rabbitmq.connection) {
+        if (!this._rabbitmq.connection) {
           throw new Error("failed to obtain rabbitmq new connection");
         }
-        connection = this.rabbitmq.connection;
+        connection = this._rabbitmq.connection;
       }
 
       const confirmChannel = await connection.createConfirmChannel();
@@ -64,7 +64,7 @@ export class ConfirmChannelManager extends EventEmitter {
       });
 
       this._channel = confirmChannel;
-      this.logger.info("[channelManager] confirm channel ready");
+      this._logger.info("[channelManager] confirm channel ready");
       for (const w of this._connectWaiting) {
         w.resolve(confirmChannel);
       }

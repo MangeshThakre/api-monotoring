@@ -12,7 +12,7 @@ import cookieParser from "cookie-parser";
 //router
 import authRouter from "./services/auth/router/authRouter.js";
 import clientRouter from "./services/client/router/clientRouter.js";
-
+import ingestRouter from "./services/ingest/router/ingestRouter.js";
 const app = express();
 
 // Middleware
@@ -45,6 +45,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth/", authRouter);
+app.use("/api/hit", ingestRouter);
 app.use("/api", clientRouter);
 // 404 handler
 app.use((req, res) => {

@@ -29,13 +29,14 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
    */
   async findByKeyValue(keyValue, includeInActive = false) {
     try {
+      
       const filter = { keyValue };
       // includeInActive ApiKey
       if (!includeInActive) {
         filter.isActive = true;
       }
       const apiKey = await this.modal.findOne(filter).populate("clientId");
-      if (!apiKey) logger.warning("unable to find apiKey");
+      if (!apiKey) logger.warn("unable to find apiKey");
       logger.info("ApiKey by keyValue got Successfully");
       return apiKey;
     } catch (error) {

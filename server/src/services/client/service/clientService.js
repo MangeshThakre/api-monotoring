@@ -1,5 +1,5 @@
 import logger from "../../../shared/config/logger.js";
-import AppError from "../../../shared/utils/appError.js";
+import AppError from "../../../shared/utils/AppError.js";
 import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 
@@ -40,8 +40,8 @@ export default class ClientService {
 
   generateApiKey() {
     const prefix = "apims";
-    const randomBytes = crypto.randomBytes(20);
-    return `${prefix}-${randomBytes}`;
+    const randomBytes = crypto.randomBytes(20).toString("hex");
+    return `${prefix}_${randomBytes}`;
   }
 
   async createClient(clientData, adminUser) {
@@ -72,12 +72,11 @@ export default class ClientService {
     }
   }
 
-
-// | Role          | Same client | Other client |
-// | ------------- | ----------- | ------------ |
-// | SUPER_ADMIN   | ✅           | ✅         |
-// | CLIENT_ADMIN  | ✅           | ❌         |
-// | CLIENT_VIEWER | ❌           | ❌         |
+  // | Role          | Same client | Other client |
+  // | ------------- | ----------- | ------------ |
+  // | SUPER_ADMIN   | ✅           | ✅         |
+  // | CLIENT_ADMIN  | ✅           | ❌         |
+  // | CLIENT_VIEWER | ❌           | ❌         |
 
   async createClientUser(clientId, newUserData, admin) {
     try {
@@ -189,6 +188,21 @@ export default class ClientService {
       return apiKeys;
     } catch (error) {
       logger.error("Error getting apiKeys: clientServiceError", error);
+      throw error;
+    }
+  }
+
+  async getClientByApiKey(apiKey) {
+    try {
+      const apiKeyRecord = await this.ApiKeyRepository.findByKeyValue(apiKey);
+      if (!apiKeyRecord) return null;
+      if (apiKeyRecord.isExpired()) return null;
+
+      const client = apiKeyRecord.clientId;
+
+      return { client, apiKey: apiKeyRecord };
+    } catch (error) {
+      logger.error("Error getting client by apiKey: clientServiceError", error);
       throw error;
     }
   }

@@ -76,7 +76,7 @@ export class ConfirmChannelManager extends EventEmitter {
         w.reject(error);
       }
       this._connectWaiting = [];
-      return error;
+      throw error;
     } finally {
       this._connecting = false;
     }

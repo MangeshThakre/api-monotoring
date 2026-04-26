@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+# Keep app files isolated from the image root.
+WORKDIR /app 
+
+COPY package*.json ./
+
+# Install runtime dependencies for the consumer container.
+RUN npm install --production
+
+COPY . .
+
+# Ensure the log directory exists before the consumer starts.
+RUN mkdir -p logs
+
+# Start the background consumer process.
+CMD ["node", "src/services/processor/consumer.js"]

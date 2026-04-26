@@ -111,7 +111,7 @@ export default class ProcessorService {
       const deleteCount = await this.ApiHitRepository.deleteOldHits(cutOffDate);
       return deleteCount;
     } catch (error) {
-      logger.error("error during cleanup old Events", error)
+      logger.error("error during cleanup old Events", error);
       throw error;
     }
   }

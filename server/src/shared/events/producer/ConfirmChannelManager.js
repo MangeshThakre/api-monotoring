@@ -29,6 +29,7 @@ export class ConfirmChannelManager extends EventEmitter {
 
   async _connect() {
     this._connecting = true;
+
     try {
       let connection;
 

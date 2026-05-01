@@ -73,10 +73,62 @@ export default class AnalyticsService {
         parsedStartTime
       );
 
-      return endpoints.map((endpoints) => {
-        // serviceName: endpoints.service_name,
-        // endpoint : endpoints.endpoint,
+      return endpoints.map((endpoint) => {
+        return {
+          serviceName: endpoint.service_name,
+          endpoint: endpoint.endpoint,
+          method: endpoint.method,
+          totalHits: parseInt(endpoint.total_hits),
+          avgLatency: parseFloat(endpoint.avg_latency).toFixed(2),
+          errorHits: parseInt(endpoint.error_hits),
+          errorRate: parseFloat(
+            (parseInt(endpoint.error_hits) / parseInt(endpoint.total_hits)) *
+              100
+          ).toFixed(2)
+        };
       });
-    } catch (error) {}
+    } catch (error) {
+      logger.error("Error Getting top endpoints: AnalyticService", error);
+      throw error;
+    }
+  }
+
+  async getTimeSeries(clientId, filters = {}) {
+    try {
+      const {
+        serviceName,
+        endpoint,
+        startTime,
+        endTime,
+        limit = 100
+      } = filters;
+
+      const { endTime: end_time, startTime: start_time } =
+        this.parseTimeFilters({ startTime, endTime });
+
+      const metrics = await this.metricsRepository.getMetrics({
+        clientId,
+        serviceName,
+        endpoint,
+        startTime: start_time,
+        endTime: end_time,
+        limit
+      });
+
+      return metrics.map((metric) => ({
+        serviceName: metric.service_name,
+        endpoint: metric.endpoint,
+        method: metric.method,
+        totalHits: parseInt(metric.total_hits),
+        errorHits: parseInt(metric.error_hits),
+        avgLatency: parseFloat(metric.avg_latency).toFixed(2),
+        minLatency: parseFloat(metric.min_latency).toFixed(2),
+        maxLatency: parseFloat(metric.max_latency).toFixed(2),
+        timeBucket: metric.time_bucket
+      }));
+    } catch (error) {
+      logger.error("Error getting time series:", error);
+      throw error;
+    }
   }
 }

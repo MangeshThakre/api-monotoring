@@ -97,7 +97,7 @@ export default class AnalyticsController {
   async getOverAllStatics(req, res, next) {
     try {
       const { startTime, endTime } = req.query;
-      console.log(startTime , endTime ,  "controller")
+      console.log(startTime, endTime, "controller");
       const clientId = req.user.clientId;
 
       const isAdmin = await this.ensureCanViewAnalytics(req);
@@ -120,6 +120,51 @@ export default class AnalyticsController {
         error
       );
       res.status(400).json(ResponseFormatter.error(error.message, error.code));
+    }
+  }
+
+  async getDashboard(req, res, next) {
+    try {
+      const { startTime, endTime } = req.query;
+      const clientId = req.user.clientId;
+
+      const isSuperAdmin = await this.ensureCanViewAnalytics(req);
+      const finalClientId = await this.resolveFinalClientId(req, isSuperAdmin);
+      const timeRange = this.validateTimeRange(startTime, endTime);
+
+      const result = await Promise.allSettled([
+        this.analyticsService.getOverallStats(finalClientId, timeRange),
+        this.analyticsService.getTopEndpoints(finalClientId, {
+          limit: 5,
+          startTime: timeRange.startTime
+        }),
+        this.analyticsService.getTimeSeries(finalClientId, {
+          ...timeRange,
+          limit: 24
+        })
+      ]);
+
+      const [stats, topEndpoints, recentTimeSeries] = result.map((item) =>
+        item.status === "fulfilled" ? item.value : null
+      );
+
+      const dashboard = {
+        stats,
+        topEndpoints,
+        recentActivity: recentTimeSeries
+      };
+
+      res
+        .status(200)
+        .json(
+          ResponseFormatter.success(
+            dashboard,
+            "Dashboard data retrieved successfully",
+            200
+          )
+        );
+    } catch (error) {
+      next(error);
     }
   }
 }

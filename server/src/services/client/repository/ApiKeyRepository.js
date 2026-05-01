@@ -1,4 +1,4 @@
-import BaseApiKeyRepository from "./baseApiKeyRepository.js";
+import BaseApiKeyRepository from "./BaseApiKeyRepository.js";
 import ApiKey from "../../../shared/models/ApiKey.js";
 import logger from "../../../shared/config/logger.js";
 
@@ -29,7 +29,6 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
    */
   async findByKeyValue(keyValue, includeInActive = false) {
     try {
-      
       const filter = { keyValue };
       // includeInActive ApiKey
       if (!includeInActive) {

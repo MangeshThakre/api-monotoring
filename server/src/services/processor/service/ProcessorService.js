@@ -27,6 +27,7 @@ export default class ProcessorService {
       default:
         date.setMinutes(0, 0, 0);
     }
+    return date.toISOString();
   }
 
   async _updateMetricsWithFallBack(eventData) {
@@ -37,7 +38,7 @@ export default class ProcessorService {
       // prepare data
       const metricsData = {
         clientId: eventData.clientId.toString(),
-        serverName: eventData.serverName,
+        serviceName: eventData.serviceName,
         endpoint: eventData.endpoint,
         method: eventData.method,
         totalHits: 1,
@@ -80,7 +81,9 @@ export default class ProcessorService {
       // if this will fail we will not cancel the whole operation,
 
       await this._updateMetricsWithFallBack(eventData);
-      logger.info();
+      logger.info("processedData saved in postgres DB: processorSErvice", {
+        eventId: eventData.eventId
+      });
     } catch (error) {
       if (!rawEventSaved) {
         logger.error(

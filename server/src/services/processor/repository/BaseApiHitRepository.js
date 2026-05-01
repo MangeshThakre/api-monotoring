@@ -1,6 +1,6 @@
-export default class BaseRepository {
+export default class BaseApiHitRepository {
   constructor(modal) {
-    this.model = modal;
+    this.modal = modal;
   }
 
   async save(data) {

@@ -1,7 +1,7 @@
 import logger from "../../../shared/config/logger.js";
 import config from "../../../shared/config/index.js";
 import jwt from "jsonwebtoken";
-import AppError from "../../../shared/utils/appError.js";
+import AppError from "../../../shared/utils/AppError.js";
 import bcrypt from "bcrypt";
 
 export default class AuthService {

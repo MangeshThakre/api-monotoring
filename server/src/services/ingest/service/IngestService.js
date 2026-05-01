@@ -56,10 +56,11 @@ class IngestService {
   async ingestApiHit(hitData) {
     try {
       this.validateHitData(hitData);
+
       const event = {
         eventId: uuidv4(),
         timestamp: new Date(),
-        serverName: hitData.serviceName,
+        serviceName: hitData.serviceName,
         endpoint: hitData.endpoint,
         method: hitData.method,
         statusCode: hitData.statusCode,
@@ -71,6 +72,7 @@ class IngestService {
       };
 
       const publish = await this.eventProducer.publishApiHit(event);
+
 
       if (!publish) {
         // Circuit breaker rejected the request

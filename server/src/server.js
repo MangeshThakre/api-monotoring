@@ -9,10 +9,12 @@ import RabbitMQConnection from "./shared/config/rabbitmq.js";
 import errorHandler from "./shared/middleware/errorHandler.js";
 import ResponseFormatter from "./shared/utils/ResponseFormatter.js";
 import cookieParser from "cookie-parser";
+// import consumer from "./services/processor/consumer.js";
 //router
 import authRouter from "./services/auth/router/authRouter.js";
 import clientRouter from "./services/client/router/clientRouter.js";
 import ingestRouter from "./services/ingest/router/ingestRouter.js";
+import AnalyticsRouter from "./services/analytics/router/AnalyticRouter.js";
 const app = express();
 
 // Middleware
@@ -46,6 +48,7 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth/", authRouter);
 app.use("/api/hit", ingestRouter);
+app.use("/api/analytics", AnalyticsRouter);
 app.use("/api", clientRouter);
 // 404 handler
 app.use((req, res) => {

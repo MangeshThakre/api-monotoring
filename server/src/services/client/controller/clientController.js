@@ -1,5 +1,5 @@
 import logger from "../../../shared/config/logger.js";
-import AppError from "../../../shared/utils/appError.js";
+import AppError from "../../../shared/utils/AppError.js";
 import ResponseFormatter from "../../../shared/utils/ResponseFormatter.js";
 
 export default class ClientController {

@@ -16,6 +16,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.js",
+    "consumer": "nodemon src/services/processor/consumer.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

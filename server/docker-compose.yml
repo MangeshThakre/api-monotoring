@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: api-monitoring-postgres
+    container_name: api_monitoring_postgres
     environment:
       POSTGRES_DB: api_monitoring
       POSTGRES_USER: postgres
@@ -22,20 +22,36 @@ services:
       retries: 5
       start_period: 30s
 
-  # mongo:
-  #   image: mongo:6.0
-  #   container_name: api-monitoring-mongo
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo_data:/data/db
-  #   networks:
-  #     - api-monitoring-network
-  #   restart: unless-stopped
+  mongo:
+    image: mongo:6.0
+    container_name: api_monitoring_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - api-monitoring-network
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: api_monitoring_mongo_ui
+    ports:
+      - "5555:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+    depends_on:
+      - mongo
+    networks:
+      - api-monitoring-network
+    restart: always
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: api-monitoring-rabbitmq
+    container_name: api_monitoring_rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin123
@@ -56,10 +72,10 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:7
-    container_name: api-monitoring-pgadmin
+    container_name: api_monitoring_pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
       - "8080:80"
     volumes:
@@ -70,15 +86,46 @@ services:
     depends_on:
       - postgres
 
+  # consumer:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.consumer
+  #   container_name: api_monitoring_consumer
+  #   environment:
+  #     NODE_ENV: production
+  #     MONGO_DB_URL: mongodb://mongo:27017
+  #     MONGO_DB_NAME: api_monitoring
+  #     POSTGRES_HOST: postgres
+  #     POSTGRES_PORT: 5432
+  #     POSTGRES_DB: api_monitoring
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #     RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/api_monitoring_vhost
+  #     RABBITMQ_QUEUE: api_monitoring_queue
+  #     JWT_SECRET: secret
+  #   volumes:
+  #     - ./logs:/app/logs
+  #   networks:
+  #     - api-monitoring-network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     mongo:
+  #       condition: service_started
+  #   restart: unless-stopped
+
   # api-app:
   #   build:
   #     context: .
   #     dockerfile: DockerFile
-  #   container_name: api-monitoring-app
+  #   container_name: api_monitoring_app
   #   ports:
-  #     - "8081:8081"
+  #     - "8082:8082"
   #   environment:
-  #   # postgres
+  #     # postgres
+  #     PORT: 8082
   #     POSTGRES_HOST: postgres
   #     POSTGRES_PORT: 5432
   #     POSTGRES_DB: api_monitoring
@@ -93,7 +140,7 @@ services:
   #     RABBITMQ_PASSWORD: admin123
   #     # mongodb
   #     MONGO_DB_URL: mongodb://mongo:27017
-  #     MONGO_DB_NAME: api-monitoring
+  #     MONGO_DB_NAME: api_monitoring
   #     MONGO_HOST: mongo
   #     MONGO_PORT: 27017
   #   networks:

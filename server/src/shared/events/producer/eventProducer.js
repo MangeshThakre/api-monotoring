@@ -36,17 +36,18 @@ export class EventProducer {
   }
 
   async publishApiHit(eventData, opts = {}) {
-        if (this._shuttingDown) {
-          const error = new Error(
-            "EventProducer is shutting down, cannot publish new messages"
-          );
-          error.code = "SHUTDOWN_IN_PROGRESS";
-          this.logger.warn(
-            "[EventProducer] Rejecting publish attempt during shutdown",
-            { eventId: eventData.eventId }
-          );
-          throw error;
-        }
+    
+    if (this._shuttingDown) {
+      const error = new Error(
+        "EventProducer is shutting down, cannot publish new messages"
+      );
+      error.code = "SHUTDOWN_IN_PROGRESS";
+      this.logger.warn(
+        "[EventProducer] Rejecting publish attempt during shutdown",
+        { eventId: eventData.eventId }
+      );
+      throw error;
+    }
 
     if (!this.circuitBreaker.allowRequest()) {
       const error = new Error(

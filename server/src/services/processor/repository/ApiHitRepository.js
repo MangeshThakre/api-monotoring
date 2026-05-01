@@ -1,8 +1,8 @@
 import ApiHits from "../../../shared/models/ApiHits.js";
-import BaseRepository from "./BaseRepository.js";
+import BaseApiHitRepository from "./BaseApiHitRepository.js";
 import logger from "../../../shared/config/logger.js";
 
-class ApiHitRepository extends BaseRepository {
+class ApiHitRepository extends BaseApiHitRepository {
   constructor() {
     super(ApiHits);
   }
@@ -11,7 +11,7 @@ class ApiHitRepository extends BaseRepository {
     try {
       const data = this.modal(eventData);
       await data.save();
-      this.logger.info("API hit saved successfully : apiHitsRepository");
+      logger.info("API hit saved successfully : apiHitsRepository");
       return data;
     } catch (error) {
       logger.error("Error saving API hit : apiHitsRepository", error);

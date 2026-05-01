@@ -8,8 +8,8 @@ const config = {
 
   //   mongoDB:
   mongo: {
-    uri: process.env.MONGO_DB_URL || "mongodb://localhost:27017",
-    dbName: process.env.MONGO_DB_NAME || "api-monitoring"
+    uri: process.env.MONGO_DB_URL || "mongodb://localhost:27017/",
+    dbName: process.env.MONGO_DB_NAME || "api_monitoring"
   },
   // postgres
   postgres: {

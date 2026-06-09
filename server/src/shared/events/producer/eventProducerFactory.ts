@@ -1,6 +1,6 @@
-import config from "../../../shared/config/index.js";
-import logger from "../../../shared/config/logger.js";
-import rabbitmq from "../../../shared/config/rabbitmq.js";
+import config from "../../config/index.js";
+import logger from "../../config/logger.js";
+import rabbitmq from "../../config/rabbitmq.js";
 
 import { EventProducer } from "./eventProducer.js";
 import { CircuitBreaker } from "./CircuitBreaker.js";

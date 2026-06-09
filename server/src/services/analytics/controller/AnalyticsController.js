@@ -67,7 +67,7 @@ export default class AnalyticsController {
     return userClientId;
   }
 
-  validTimeRange(startTime, endTime) {
+  validateTimeRange(startTime, endTime) {
     const parseValue = (v) => {
       if (v === undefined || v === null || v === "") return null;
 
@@ -102,7 +102,7 @@ export default class AnalyticsController {
 
       const isAdmin = await this.ensureCanViewAnalytics(req);
       const finalClientId = await this.resolveFinalClientId(req, isAdmin);
-      const timeRange = this.validTimeRange(startTime, endTime);
+      const timeRange = this.validateTimeRange(startTime, endTime);
 
       const stats = await this.AnalyticsService.getOverAllStatics(
         finalClientId,
@@ -133,12 +133,12 @@ export default class AnalyticsController {
       const timeRange = this.validateTimeRange(startTime, endTime);
 
       const result = await Promise.allSettled([
-        this.analyticsService.getOverallStats(finalClientId, timeRange),
-        this.analyticsService.getTopEndpoints(finalClientId, {
+        this.AnalyticsService.getOverAllStatics(finalClientId, timeRange),
+        this.AnalyticsService.getTopEndpoints(finalClientId, {
           limit: 5,
           startTime: timeRange.startTime
         }),
-        this.analyticsService.getTimeSeries(finalClientId, {
+        this.AnalyticsService.getTimeSeries(finalClientId, {
           ...timeRange,
           limit: 24
         })

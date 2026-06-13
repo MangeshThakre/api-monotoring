@@ -1,14 +1,34 @@
-import mongoose from "mongoose";
+import { Schema, Document, model } from "mongoose";
 import bcrypt from "bcrypt";
 
-const userSchema = new mongoose.Schema({
+//  USER MODEL INTERFACE
+
+export interface IUser extends Document {
+  userName: string;
+  email: string;
+  password: string;
+  role: "super_admin" | "client_admin" | "client_viewer";
+  clientId?: string;
+  isActive: boolean;
+  permissions: {
+    canManageUsers: boolean;
+    canCreateApiKeys: boolean;
+    canViewAnalytics: boolean;
+    canExportData: boolean;
+  };
+  timeStamp: Date;
+}
+
+//  USER MODEL SCHEMA
+
+const userSchema = new Schema<IUser>({
   userName: {
     type: String,
     required: true,
     unique: true,
     trim: true,
     validation: {
-      function(userName) {
+      function(userName: string) {
         return /^[a-zA-Z0-9_]+$/.test(userName); // only allow alphanumeric and underscores
       },
       message:
@@ -22,7 +42,7 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     validation: {
-      function(email) {
+      function(email: string) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // simple email validation
       },
       message: "please enter a valid email address"
@@ -34,7 +54,7 @@ const userSchema = new mongoose.Schema({
     minLength: 6,
     maxLength: 12,
     validation: {
-      function(password) {
+      function(password: string) {
         return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password); // at least 6 characters, at least one letter and one number
       },
       message:
@@ -47,7 +67,7 @@ const userSchema = new mongoose.Schema({
     default: "client_viewer"
   },
   clientId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Client",
     required: function () {
       return this.role !== "super_admin"; // clientId is required for all roles except super_admin
@@ -87,6 +107,6 @@ userSchema.pre("save", async function (next) {
 
 userSchema.index({ clientId: 1, isActive: 1 }); // create a compound index on clientId and email to enforce uniqueness
 userSchema.index({ role: 1 }); // index on role for faster queries by role
-const User = mongoose.model("User", userSchema);
+const User = model("User", userSchema);
 
 export default User;

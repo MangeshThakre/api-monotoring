@@ -4,17 +4,27 @@ import jwt from "jsonwebtoken";
 import AppError from "../../../shared/utils/AppError.js";
 import bcrypt from "bcrypt";
 
+import User, { IUser } from "../../../shared/models/User.js";
+
+interface IUserResponse {
+  findAll(): Promise<IUser[]>;
+  create(user: IUser): Promise<IUser>;
+  findByEmail(email: string): Promise<IUser | null>;
+  findById(id: string): Promise<IUser | null>;
+}
+
 export default class AuthService {
-  constructor(userRepository) {
+  constructor(private userRepository: IUserResponse) {
     if (!userRepository) {
       throw new Error("UserRepository is required");
     }
-    this.userRepository = userRepository;
+    // this.userRepository = userRepository;
   }
 
   // generate jwt token
-  generateToken(user) {
+  generateToken(user: IUser): string {
     const { _id, email, userName, role, clientId } = user;
+
     const payload = {
       _id,
       email,
@@ -23,16 +33,20 @@ export default class AuthService {
       clientId
     };
 
-    return jwt.sign(payload, config.jwt.secret, {
-      expiresIn: config.jwt.expiresIn
-    });
+    const options = { expiresIn: config.jwt.expiresIn as any };
+
+    return jwt.sign(payload, config.jwt.secret, options);
   }
+
   //compare password
-  comparePassword(userEnteredPassword, hashedPassword) {
+  comparePassword(
+    userEnteredPassword: string,
+    hashedPassword: string
+  ): Promise<boolean> {
     return bcrypt.compare(userEnteredPassword, hashedPassword);
   }
 
-  async onboardSuperAdmin(superAdmin) {
+  async onboardSuperAdmin(superAdmin: IUser) {
     try {
       const existingUser = await this.userRepository.findAll();
       // first person to login in the app = "superAdmin"
@@ -54,7 +68,7 @@ export default class AuthService {
     }
   }
 
-  async registration(userData) {
+  async registration(userData: any) {
     try {
       const permissions = {
         canManageUsers: false,
@@ -77,14 +91,14 @@ export default class AuthService {
     }
   }
 
-  async login(credentials) {
+  async login(credentials: { email: string; password: string }) {
     try {
       const user = await this.userRepository.findByEmail(credentials.email);
       if (!user) {
-        throw new Error("Invalid credentials", 400);
+        throw new AppError("Invalid credentials", 400);
       }
       if (!user.isActive) {
-        throw new Error("Account is deactivated", 400);
+        throw new AppError("Account is deactivated", 400);
       }
       const isMatch = await this.comparePassword(
         credentials.password,
@@ -92,7 +106,7 @@ export default class AuthService {
       );
 
       if (!isMatch) {
-        throw new Error("Invalid credentials", 400);
+        throw new AppError("Invalid credentials", 400);
       }
       const token = this.generateToken(user);
       logger.info("user Login successfully : authService");
@@ -104,7 +118,7 @@ export default class AuthService {
     }
   }
 
-  async getUser(id) {
+  async getUser(id: string) {
     try {
       const user = await this.userRepository.findById(id);
       if (!user) {
@@ -118,7 +132,7 @@ export default class AuthService {
     }
   }
 
-  async checkSuperAdminPermission(userId) {
+  async checkSuperAdminPermission(userId: string) {
     try {
       const user = await this.userRepository.findById(userId);
       if (!user) {
@@ -126,7 +140,7 @@ export default class AuthService {
       }
       return user.role === "super_admin";
     } catch (error) {
-      logger.error("");
+      logger.error("Error checking super admin permission: authService", error);
       throw error;
     }
   }

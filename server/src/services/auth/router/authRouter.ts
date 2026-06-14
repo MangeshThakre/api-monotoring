@@ -10,8 +10,7 @@ import {
 
 const authRouter = express.Router();
 
-const { controller } = dependencies;
-const authController = controller.authController;
+const { authController } = dependencies.controller;
 
 // onboard super admin
 authRouter.post(
@@ -30,7 +29,7 @@ authRouter.post(
 );
 
 // login user
-authRouter.get("/login", validate(loginSchema), (req, res, next) =>
+authRouter.post("/login", validate(loginSchema), (req, res, next) =>
   authController.login(req, res, next)
 );
 

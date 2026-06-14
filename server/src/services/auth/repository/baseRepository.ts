@@ -1,28 +1,29 @@
+import { Model, Document } from "mongoose";
 // interface
 
 class BaseRepository {
-  constructor(modal) {
-    this.modal = modal;
+  constructor(protected model: Model<any>) {
+    this.model = model;
   }
 
-  async create(data){
-    throw new Error("method not implemented")
+  async create(data: any) {
+    throw new Error("method not implemented");
   }
 
-  async findById(id){
-    throw new Error("method not implemented")
+  async findById(id: string) {
+    throw new Error("method not implemented");
   }
 
-    async findByUserName(userName){
-    throw new Error("method not implemented")
+  async findByUserName(userName: string) {
+    throw new Error("method not implemented");
   }
 
-   async findByEmail(Email){
-    throw new Error("method not implemented")
+  async findByEmail(Email: string) {
+    throw new Error("method not implemented");
   }
 
-     async findAll(){
-    throw new Error("method not implemented")
+  async findAll(): Promise<any[]> {
+    throw new Error("method not implemented");
   }
 }
 

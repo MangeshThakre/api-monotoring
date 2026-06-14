@@ -1,15 +1,27 @@
 import logger from "../../../shared/config/logger.js";
 import ResponseFormatter from "../../../shared/utils/ResponseFormatter.js";
+import { Request, Response, NextFunction } from "express";
+import { IUser } from "../../../shared/models/User.js";
+
+interface IAuthService {
+  onboardSuperAdmin(superAdmin: any): Promise<{ user: any; token: string }>;
+  registration(userData: any): Promise<{ user: any; token: string }>;
+  login(credentials: {
+    email: string;
+    password: string;
+  }): Promise<{ user: any; token: string }>;
+  getUser(id: string): Promise<any>;
+  logOut(): Promise<void>;
+}
 
 export default class AuthController {
-  constructor(authService) {
+  constructor(private authService: IAuthService) {
     if (!authService) {
-      throw new error("authService is required");
+      throw new Error("authService is required");
     }
-    this.authService = authService;
   }
 
-  async onboardSuperAdmin(req, res, next) {
+  async onboardSuperAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const { userName, email, password } = req.body;
       const superAdminData = { userName, email, password, role: "super_admin" };
@@ -36,7 +48,7 @@ export default class AuthController {
     }
   }
 
-  async registration(req, res, next) {
+  async registration(req: Request, res: Response, next: NextFunction) {
     try {
       const { userName, email, password, role } = req.body;
 
@@ -47,7 +59,7 @@ export default class AuthController {
         role
       });
 
-      req.cookie("authToken", token, {
+      res.cookie("authToken", token, {
         httpOnly: true,
         secure: false,
         maxAge: 24 * 60 * 60 * 1000
@@ -63,7 +75,7 @@ export default class AuthController {
     }
   }
 
-  async login(req, res, next) {
+  async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
 
@@ -84,24 +96,26 @@ export default class AuthController {
     }
   }
 
-  async getUser(req, res, next) {
+  async getUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { _id } = req.user;
+      const { _id } = req.user as any; // Assuming req.user is populated by the authenticate middleware
       const user = await this.authService.getUser(_id);
       return res
         .status(200)
-        .json(ResponseFormatter.success(user, "Got user data successfully"));
+        .json(
+          ResponseFormatter.success(user, "Got user data successfully", 200)
+        );
     } catch (error) {
       logger.error("Error Getting User: authController:", error);
       next(error);
     }
   }
-  async logOut(req, res, next) {
+  async logOut(req: Request, res: Response, next: NextFunction) {
     try {
       res.clearCookie("authToken");
       return res
         .status(200)
-        .json(ResponseFormatter.success("logged out successfully", 200));
+        .json(ResponseFormatter.success("", "logged out successfully", 200));
     } catch (error) {
       logger.error("Error during logout :authController:", error);
       next(error);

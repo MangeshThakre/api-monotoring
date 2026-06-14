@@ -1,16 +1,24 @@
 import BaseRepository from "./baseRepository.js";
-import User from "../../../shared/models/User.js";
 import logger from "../../../shared/config/logger.js";
+import User, { IUser } from "../../../shared/models/User.js";
 
-class MongoUserRepository extends BaseRepository {
+interface IUserRepository {
+  create(userData: any): Promise<any>;
+  findById(userId: string): Promise<any>;
+  findByUserName(userName: string): Promise<any>;
+  findByEmail(userEmail: string): Promise<any>;
+  findAll(): Promise<any>;
+}
+
+class MongoUserRepository extends BaseRepository implements IUserRepository {
   constructor() {
     super(User);
   }
 
-  async create(userData) {
+  async create(userData: Partial<IUser>) {
     try {
       let data = { ...userData };
-      if ((data.role === "super_admin") & !data.permissions) {
+      if (data.role === "super_admin" && !data.permissions) {
         data.permissions = {
           canManageUsers: true,
           canCreateApiKeys: true,
@@ -18,7 +26,7 @@ class MongoUserRepository extends BaseRepository {
           canExportData: true
         };
       }
-      const user = new this.modal(data);
+      const user = new this.model(data);
       await user.save();
       logger.info("user create successfully..");
       return user;
@@ -28,9 +36,9 @@ class MongoUserRepository extends BaseRepository {
     }
   }
 
-  async findById(userId) {
+  async findById(userId: string) {
     try {
-      const user = await this.modal.findById(userId);
+      const user = await this.model.findById(userId);
       return user;
     } catch (error) {
       logger.error("Error getting user");
@@ -38,18 +46,18 @@ class MongoUserRepository extends BaseRepository {
     }
   }
 
-  async findByUserName(userName) {
+  async findByUserName(userName: string) {
     try {
-      const user = await this.modal.findOne({ userName: userName });
+      const user = await this.model.findOne({ userName: userName });
       return user;
     } catch (error) {
       logger.error("Error getting User", error);
     }
   }
 
-  async findByEmail(userEmail) {
+  async findByEmail(userEmail: string) {
     try {
-      const user = await this.modal.findOne({ email: userEmail });
+      const user = await this.model.findOne({ email: userEmail });
       return user;
     } catch (error) {
       logger.error("Error getting User", error);
@@ -57,9 +65,9 @@ class MongoUserRepository extends BaseRepository {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<any[]> {
     try {
-      const user = await this.modal
+      const user = await this.model
         .find({ isActive: true })
         .select("-password");
       return user;

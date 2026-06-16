@@ -202,8 +202,8 @@ export default class ClientService {
 
   async getClientApikeys(clientId: string) {
     try {
-      const apiKeys = await this.ApiKeyRepository.findByClientId(clientId);
-      return apiKeys;
+      const apiKey = await this.ApiKeyRepository.findByClientId(clientId);
+      return apiKey;
     } catch (error) {
       logger.error("Error getting apiKeys: clientServiceError", error);
       throw error;

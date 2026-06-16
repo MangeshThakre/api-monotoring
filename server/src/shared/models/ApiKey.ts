@@ -4,7 +4,7 @@ import { Schema, model } from "mongoose";
  * Each API key belongs to a client and is used for authentication
  */
 
-interface IApiKey {
+export interface IApiKey {
   keyId: string;
   keyValue: string;
   clientId: Schema.Types.ObjectId;

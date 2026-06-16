@@ -1,20 +1,23 @@
+import { Model } from "mongoose";
+import { IApiKey } from "../../../shared/models/ApiKey.js";
+
 export default class BaseApiKeyRepository {
-  constructor(modal) {
-    this.modal = modal;
+  constructor(protected model: Model<any>) {
+    this.model = model;
   }
 
-  async create(apiKeyData) {
+  async create(apiKeyData: Partial<IApiKey>) {
     throw new Error("method not implemented");
   }
 
-  async findByKeyValue(keyValue) {
+  async findByKeyValue(keyValue: string, includeInActive: boolean = false) {
     throw new Error("Method not Implemented");
   }
 
-  async findByClientId(clientId) {
+  async findByClientId(clientId: string): Promise<IApiKey[]> {
     throw new Error("Method not Implemented");
   }
-  async countByClientId(clientId, filters) {
-    throw new Error1("Method not Implemented");
+  async countByClientId(clientId: string, filters: any) {
+    throw new Error("Method not Implemented");
   }
 }

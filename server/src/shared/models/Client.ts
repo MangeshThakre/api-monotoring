@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-interface IClient {
+export interface IClient {
   name: string;
   slug: string;
   email: string;

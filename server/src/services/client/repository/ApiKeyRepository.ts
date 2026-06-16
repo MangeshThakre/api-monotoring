@@ -1,6 +1,7 @@
 import BaseApiKeyRepository from "./BaseApiKeyRepository.js";
 import ApiKey from "../../../shared/models/ApiKey.js";
 import logger from "../../../shared/config/logger.js";
+import { IApiKey } from "../../../shared/models/ApiKey.js";
 
 export default class MongoApiKeyRepository extends BaseApiKeyRepository {
   constructor() {
@@ -11,9 +12,9 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
    * @param  apiKeyData
    * @returns api key
    */
-  async create(apiKeyData) {
+  async create(apiKeyData: Partial<IApiKey>) {
     try {
-      const apiKey = new this.modal(apiKeyData);
+      const apiKey = new this.model(apiKeyData);
       await apiKey.save();
       logger.info("ApiKey created successfully");
       return apiKey;
@@ -27,14 +28,16 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
    * @param {*} keyValue
    * @returns
    */
-  async findByKeyValue(keyValue, includeInActive = false) {
+  async findByKeyValue(keyValue: string, includeInActive = false) {
     try {
-      const filter = { keyValue };
+      const filter: any = { keyValue };
       // includeInActive ApiKey
+
       if (!includeInActive) {
         filter.isActive = true;
       }
-      const apiKey = await this.modal.findOne(filter).populate("clientId");
+
+      const apiKey = await this.model.findOne(filter).populate("clientId");
       if (!apiKey) logger.warn("unable to find apiKey");
       logger.info("ApiKey by keyValue got Successfully");
       return apiKey;
@@ -47,10 +50,10 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
   /**
    * @param {*} clientId
    */
-  async findByClientId(clientId) {
+  async findByClientId(clientId: string) {
     try {
-      const apiKeys = await this.modal
-        .find({ clientId: clientId })
+      const apiKeys = await this.model
+        .findOne({ clientId })
         .populate("clientId");
       logger.info("apiKey by clientId got Successfully");
       return apiKeys;
@@ -63,7 +66,7 @@ export default class MongoApiKeyRepository extends BaseApiKeyRepository {
     }
   }
 
-  async countByClientId(clientId, filters) {
+  async countByClientId(clientId: string, filters: any) {
     try {
     } catch (error) {
       logger.error("Error getting Count: apiKeyREpository:", error);

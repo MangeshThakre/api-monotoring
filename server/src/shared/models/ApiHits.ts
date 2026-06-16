@@ -1,10 +1,25 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
 /**
  * MongoDB schema for raw API hit events
  * Stores every individual API call
  */
-const apiHitSchema = new mongoose.Schema(
+
+interface IApiHit {
+  eventId: string;
+  timestamp: Date;
+  serviceName: string;
+  endpoint: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
+  statusCode: number;
+  latencyMs: number;
+  clientId: Schema.Types.ObjectId;
+  apiKeyId: Schema.Types.ObjectId;
+  ip: string;
+  userAgent?: string;
+}
+
+const apiHitSchema = new Schema<IApiHit>(
   {
     eventId: {
       type: String,
@@ -41,13 +56,13 @@ const apiHitSchema = new mongoose.Schema(
       required: true
     },
     clientId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Client",
       required: true,
       index: true
     },
     apiKeyId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "ApiKey",
       required: true,
       index: true
@@ -73,6 +88,6 @@ apiHitSchema.index({ clientId: 1, timestamp: -1, statusCode: 1 });
 apiHitSchema.index({ apiKeyId: 1, timestamp: -1 });
 apiHitSchema.index({ timestamp: 1 }, { expireAfterSeconds: 2592000 });
 
-const ApiHit = mongoose.model("ApiHit", apiHitSchema);
+const ApiHit = model("ApiHit", apiHitSchema);
 
 export default ApiHit;

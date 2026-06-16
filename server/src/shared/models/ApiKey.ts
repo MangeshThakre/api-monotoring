@@ -1,10 +1,38 @@
-import mongoose from "mongoose";
-
+import { Schema, model } from "mongoose";
 /**
  * MongoDB schema for API keys
  * Each API key belongs to a client and is used for authentication
  */
-const apiKeySchema = new mongoose.Schema(
+
+interface IApiKey {
+  keyId: string;
+  keyValue: string;
+  clientId: Schema.Types.ObjectId;
+  name: string;
+  description: string;
+  environment: "production" | "staging" | "development" | "testing";
+  isActive: boolean;
+  permissions: {
+    canIngest: boolean;
+    canReadAnalytics: boolean;
+    allowedServices: string[];
+  };
+  security: {
+    allowedIPs: string[];
+    allowedOrigins: string[];
+  };
+  expiresAt: Date;
+  metadata: {
+    createdBy: Schema.Types.ObjectId;
+    purpose: string;
+    tags: string[];
+  };
+  createdBy: Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const apiKeySchema = new Schema<IApiKey>(
   {
     keyId: {
       type: String,
@@ -19,7 +47,7 @@ const apiKeySchema = new mongoose.Schema(
       index: true
     },
     clientId: {
-      type: mongoose.Schema.Types.ObjectId, // 123
+      type: Schema.Types.ObjectId, // 123
       ref: "Client",
       required: true,
       index: true
@@ -32,7 +60,7 @@ const apiKeySchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      maxlength: 500,
+      maxength: 500,
       default: ""
     },
     environment: {
@@ -105,7 +133,7 @@ const apiKeySchema = new mongoose.Schema(
     },
     metadata: {
       createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User"
       },
       purpose: {
@@ -122,7 +150,7 @@ const apiKeySchema = new mongoose.Schema(
       ]
     },
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true
     }
@@ -143,6 +171,6 @@ apiKeySchema.methods.isExpired = function () {
   return new Date(this.expiresAt) < new Date();
 };
 
-const ApiKey = mongoose.model("ApiKey", apiKeySchema);
+const ApiKey = model("ApiKey", apiKeySchema);
 
 export default ApiKey;

@@ -2,8 +2,8 @@ import express from "express";
 import Dependencies from "../Dependencies/Dependencies.js";
 import authenticate from "../../../shared/middleware/authenticate.js";
 const clientRouter = express.Router();
-const { controller } = Dependencies;
-const clientController = controller.clientController;
+
+const { clientController } = Dependencies.controller;
 
 clientRouter.use(authenticate); // no need to add in each router
 

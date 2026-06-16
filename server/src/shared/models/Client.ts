@@ -1,6 +1,22 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const clientSchema = new mongoose.Schema({
+interface IClient {
+  name: string;
+  slug: string;
+  email: string;
+  description: string;
+  website: string;
+  createdBy: Schema.Types.ObjectId;
+  isActive: boolean;
+  settings: {
+    dataRetentionDays: number;
+    alertsEnabled: boolean;
+    timeZone: string;
+  };
+  timestamp: Date;
+}
+
+const clientSchema = new Schema<IClient>({
   name: {
     type: String,
     required: true,
@@ -19,8 +35,8 @@ const clientSchema = new mongoose.Schema({
     required: true,
     unique: true,
     lowercase: true,
-    validation: {
-      function(email) {
+    validate: {
+      validator: (email: string) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // simple email validation
       },
       message: "please enter a valid email address"
@@ -37,7 +53,7 @@ const clientSchema = new mongoose.Schema({
     default: ""
   },
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "User",
     required: true
   },
@@ -61,8 +77,12 @@ const clientSchema = new mongoose.Schema({
       type: String,
       default: "UTC"
     }
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
   }
 });
 
-const Client = mongoose.model("Client", clientSchema);
+const Client = model("Client", clientSchema);
 export default Client;

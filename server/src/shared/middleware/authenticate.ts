@@ -4,7 +4,7 @@ import config from "../config/index.js";
 import logger from "../config/logger.js";
 import { Request, Response, NextFunction } from "express";
 
-interface IJwtPayload {
+export interface IJwtPayload {
   _id: string;
   email: string;
   userName: string;

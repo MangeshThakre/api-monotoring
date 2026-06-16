@@ -1,30 +1,44 @@
 import logger from "../../../shared/config/logger.js";
 import AppError from "../../../shared/utils/AppError.js";
 import { v4 as uuidv4 } from "uuid";
+import { IJwtPayload } from "../../../shared/middleware/authenticate.js";
 import crypto from "crypto";
 
 import {
   APPLICATION_ROLES,
   isValidClientRole
 } from "../../../shared/constant/roles.js";
-import { create } from "domain";
+
+interface IClientRepository {
+  findBySlug(slug: string): Promise<any>;
+  create(clientData: any): Promise<any>;
+  findById(clientId: string): Promise<any>;
+}
+interface IApiKeyRepository {
+  create(apiKeyData: any): Promise<any>;
+  findByClientId(clientId: string): Promise<any>;
+  findByKeyValue(keyValue: string): Promise<any>;
+}
+interface IUserRepository {
+  create(userData: any): Promise<any>;
+}
 
 export default class ClientService {
-  constructor(ClientRepository, ApiKeyRepository, UserRepository) {
-    if (!ClientRepository) throw new Error("clientRepository required");
-    if (!ApiKeyRepository) throw new Error("apiKeyRepository required");
-    if (!UserRepository) throw new Error("UserRepository required");
-
+  constructor(
+    private ClientRepository: IClientRepository,
+    private ApiKeyRepository: IApiKeyRepository,
+    private UserRepository: IUserRepository
+  ) {
     this.ClientRepository = ClientRepository;
     this.ApiKeyRepository = ApiKeyRepository;
     this.UserRepository = UserRepository;
   }
 
-  generateSlug(name) {
+  generateSlug(name: string) {
     return name.toLowerCase();
   }
 
-  canUserAccessClient(user, clientId) {
+  canUserAccessClient(user: IJwtPayload, clientId: string) {
     // SUPER_ADMIN can create users for any client.
 
     if (user.role === APPLICATION_ROLES.SUPER_ADMIN) {
@@ -44,7 +58,7 @@ export default class ClientService {
     return `${prefix}_${randomBytes}`;
   }
 
-  async createClient(clientData, adminUser) {
+  async createClient(clientData: any, adminUser: IJwtPayload) {
     try {
       const { name, email, description, website } = clientData;
       const slug = this.generateSlug(name);
@@ -78,7 +92,11 @@ export default class ClientService {
   // | CLIENT_ADMIN  | ✅           | ❌         |
   // | CLIENT_VIEWER | ❌           | ❌         |
 
-  async createClientUser(clientId, newUserData, admin) {
+  async createClientUser(
+    clientId: string,
+    newUserData: any,
+    admin: IJwtPayload
+  ) {
     try {
       if (!this.canUserAccessClient(admin, clientId)) {
         throw new AppError("Access denied", 400);
@@ -138,7 +156,7 @@ export default class ClientService {
     }
   }
 
-  async createApiKey(clientId, keyData, user) {
+  async createApiKey(clientId: string, keyData: any, user: IJwtPayload) {
     try {
       const client = await this.ClientRepository.findById(clientId);
       if (!client) {
@@ -182,7 +200,7 @@ export default class ClientService {
     }
   }
 
-  async getClientApikeys(clientId) {
+  async getClientApikeys(clientId: string) {
     try {
       const apiKeys = await this.ApiKeyRepository.findByClientId(clientId);
       return apiKeys;
@@ -192,7 +210,7 @@ export default class ClientService {
     }
   }
 
-  async getClientByApiKey(apiKey) {
+  async getClientByApiKey(apiKey: string) {
     try {
       const apiKeyRecord = await this.ApiKeyRepository.findByKeyValue(apiKey);
       if (!apiKeyRecord) return null;

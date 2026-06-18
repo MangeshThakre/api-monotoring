@@ -19,7 +19,7 @@ export default class ProcessorService {
       throw new Error("processor required MetricsRepository");
   }
 
-  getTimeBucket(timeBucket, interval = "hour") {
+  getTimeBucket(timeBucket: any, interval = "hour") {
     const date = new Date(timeBucket);
 
     switch (interval) {
@@ -38,7 +38,7 @@ export default class ProcessorService {
     return date.toISOString();
   }
 
-  async _updateMetricsWithFallBack(eventData) {
+  async _updateMetricsWithFallBack(eventData: any) {
     try {
       // calculate time bucket
       const timeBucket = this.getTimeBucket(eventData.timestamp, "hour"); // [12:00-12:59] [01:00-01:59]
@@ -116,8 +116,8 @@ export default class ProcessorService {
 
   async cleanupOldEvents(daysToKeep = 30) {
     try {
-      let cutOffDate = new Data();
-      cutOffDate.setDate(cutOffDate.getData() - daysToKeep);
+      let cutOffDate = new Date();
+      cutOffDate.setDate(cutOffDate.getDate() - daysToKeep);
 
       const deleteCount = await this.ApiHitRepository.deleteOldHits(cutOffDate);
       return deleteCount;

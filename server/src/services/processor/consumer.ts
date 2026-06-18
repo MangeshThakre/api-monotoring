@@ -10,7 +10,7 @@ import {
 } from "../../shared/events/producer/RetryStrategy.js";
 import { CircuitBreaker } from "../../shared/events/producer/CircuitBreaker.js";
 import { EVENTS_TYPES } from "../../shared/events/eventContracts.js";
-import processorContainer from "./dependencies/Dependencies.js";
+import Dependencies from "./dependencies/Dependencies.js";
 
 const messageSchema = z.object({
   type: z.enum([EVENTS_TYPES.API_HIT]),
@@ -20,9 +20,9 @@ const messageSchema = z.object({
 });
 
 class EventConsumer {
-  constructor( {
+  constructor({
     processorService,
-    rabbitmq ,
+    rabbitmq,
     postgres,
     mongodb,
     config,
@@ -30,7 +30,7 @@ class EventConsumer {
     retryStrategy,
     isRetryable,
     circuitBreaker
-  }: any) {
+  }) {
     this._processorService = processorService;
     this._rabbitmq = rabbitmq;
     this._postgres = postgres;
@@ -344,6 +344,7 @@ class EventConsumer {
   }
 }
 
+//  Retry strategy
 const retryStrategy = new RetryStrategy({
   maxRetries: config.rabbitmq.retryAttempts,
   baseDelayMs: config.rabbitmq.retryDelay,
@@ -351,6 +352,7 @@ const retryStrategy = new RetryStrategy({
   jitterFactor: 0.3
 });
 
+// circuitBreaker
 const circuitBreaker = new CircuitBreaker({
   failureThreshold: 5,
   cooldownMs: 30_000,
@@ -358,8 +360,10 @@ const circuitBreaker = new CircuitBreaker({
   logger
 });
 
+// consumer
+const { ProcessorService } = Dependencies.service;
 const consumer = new EventConsumer({
-  processorService: processorContainer.service.ProcessorService,
+  processorService: ProcessorService,
   rabbitmq,
   mongodb,
   postgres,

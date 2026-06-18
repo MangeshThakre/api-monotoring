@@ -6,10 +6,12 @@ import config from "./index.js";
  * RabbitMQ connection setup
  */
 
-
 // follows design pattern - singleton
 
 class RabbitMQConnection {
+  private connection: any | null;
+  private channel: any | null;
+  private isConnecting: boolean;
   constructor() {
     this.connection = null;
     this.channel = null;
@@ -24,7 +26,7 @@ class RabbitMQConnection {
     // Prevent multiple connections:
     // If already connecting, wait until it's done and reuse the same connection
     if (this.isConnecting) {
-      await new Promise((resolve) => {
+      await new Promise<void>((resolve) => {
         const checkInterval = setInterval(() => {
           if (!this.isConnecting) {
             clearInterval(checkInterval);
@@ -70,7 +72,7 @@ class RabbitMQConnection {
       });
 
       // handle channel errors
-      this.channel.on("error", (error) => {
+      this.channel?.on("error", (error: any) => {
         logger.error("rabbitmq channel error", error);
         this.channel = null;
         this.connection = null;
@@ -89,10 +91,11 @@ class RabbitMQConnection {
     return this.channel;
   }
 
-  getStatus() {
-    if (!this.connect() || !this.channel) return "disconnected";
-    if (!this.channel.closing) return "connected";
-    return "connected";
+  public getStatus(): "connected" | "disconnected" {
+    if (this.connection && this.channel) {
+      return "connected";
+    }
+    return "disconnected";
   }
 
   async close() {
@@ -100,16 +103,22 @@ class RabbitMQConnection {
       if (this.channel) {
         await this.channel.close();
         logger.info("rabbitmq channel closed");
-        this.channel = null;
       }
       if (this.connection) {
         await this.connection.close();
         logger.info("rabbitmq connection closed");
-        this.connection = null;
       }
     } catch (error) {
       logger.error("error closing rabbitmq connection", error);
+    } finally {
+      this._handleDisconnect();
     }
+  }
+
+  // Helper method to reset internal state gracefully
+  private _handleDisconnect(): void {
+    this.channel = null;
+    this.connection = null;
   }
 }
 

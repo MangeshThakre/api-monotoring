@@ -13,10 +13,10 @@ class Container {
     };
 
     const service = {
-      ProcessorService: new ProcessorService({
-        ApiHitRepository: repository.ApiHitRepository,
-        MetricsRepository: repository.MetricsRepository
-      })
+      ProcessorService: new ProcessorService(
+        repository.ApiHitRepository,
+        repository.MetricsRepository
+      )
     };
 
     return { repository, service };

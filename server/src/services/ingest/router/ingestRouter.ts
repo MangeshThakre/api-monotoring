@@ -2,7 +2,6 @@ import express from "express";
 import Container from "../Dependencies/Dependencies.js";
 import validateApiKey from "../../../shared/middleware/validateApiKey.js";
 import rateLimiter from "express-rate-limit";
-import config from "../../../shared/config/index.js";
 
 const ingestRouter = express.Router();
 
@@ -20,6 +19,6 @@ ingestRouter.use(ingestRateLimiter);
 
 ingestRouter.post("/", validateApiKey, (req, res, next) =>
   ingestController.ingestApiHit(req, res, next)
-);
+); 
 
 export default ingestRouter;

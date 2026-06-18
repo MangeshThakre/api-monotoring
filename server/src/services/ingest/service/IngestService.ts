@@ -3,13 +3,11 @@ import AppError from "../../../shared/utils/AppError.js";
 import { v4 as uuidv4 } from "uuid";
 
 class IngestService {
-  constructor(eventProducer) {
+  constructor(private eventProducer: any) {
     if (!eventProducer) throw new Error("Event producer factory is required");
-
-    this.eventProducer = eventProducer;
   }
 
-  validateHitData(hitData) {
+  validateHitData(hitData: any) {
     const requiredFields = [
       "serviceName",
       "endpoint",
@@ -53,7 +51,7 @@ class IngestService {
     }
   }
 
-  async ingestApiHit(hitData) {
+  async ingestApiHit(hitData: any) {
     try {
       this.validateHitData(hitData);
 
@@ -72,7 +70,6 @@ class IngestService {
       };
 
       const publish = await this.eventProducer.publishApiHit(event);
-
 
       if (!publish) {
         // Circuit breaker rejected the request
@@ -93,7 +90,7 @@ class IngestService {
 
       logger.info("Successfully ingested API hit event:", {
         eventId: event.eventId,
-        serverName: event.serverName,
+        serviceName: event.serviceName,
         endpoint: event.endpoint
       });
 

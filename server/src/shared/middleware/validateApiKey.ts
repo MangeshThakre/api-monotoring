@@ -1,10 +1,15 @@
 import ResponseFormatter from "../utils/ResponseFormatter.js";
 import logger from "../config/logger.js";
 import clientContainer from "../../services/client/Dependencies/Dependencies.js";
+import { Request, Response, NextFunction } from "express";
 
-const validateApiKey = async (req, res, next) => {
+const validateApiKey = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const apiKey = req.headers["x-api-key"];
+    const apiKey = req.headers["x-api-key"] as string;
 
     // console.log("hello");
     // console.log("apiKey", apiKey);
@@ -62,8 +67,9 @@ const validateApiKey = async (req, res, next) => {
     // No API key usage tracking required
 
     // Add client and API key info to request
-    req.client = client;
-    req.apiKey = apiKeyRecord;
+    req.clientId = client._id;
+    req.clientName = client.name;
+    req.apiKeyId = apiKeyRecord._id;
 
     logger.debug("API key validated successfully", {
       clientId: client._id,

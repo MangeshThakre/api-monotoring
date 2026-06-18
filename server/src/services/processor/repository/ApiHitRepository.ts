@@ -1,15 +1,21 @@
-import ApiHits from "../../../shared/models/ApiHits.js";
+import ApiHits, { IApiHit } from "../../../shared/models/ApiHits.js";
 import BaseApiHitRepository from "./BaseApiHitRepository.js";
 import logger from "../../../shared/config/logger.js";
+
+type QueryOptions = {
+  skip?: number;
+  limit?: number;
+  sort?: any;
+};
 
 class ApiHitRepository extends BaseApiHitRepository {
   constructor() {
     super(ApiHits);
   }
 
-  async save(eventData) {
+  async save(eventData: Partial<IApiHit>) {
     try {
-      const data = this.modal(eventData);
+      const data = new this.model(eventData);
       await data.save();
       logger.info("API hit saved successfully : apiHitsRepository");
       return data;
@@ -19,8 +25,9 @@ class ApiHitRepository extends BaseApiHitRepository {
     }
   }
 
-  async find(filter = {}, options = {}) {
+  async find(filter = {}, options: QueryOptions = {}) {
     try {
+      // default value of the options of options value not exist
       const { skip = 0, limit = 10, sort = { timestamp: -1 } } = options;
 
       const apiHits = await this.model
@@ -48,16 +55,19 @@ class ApiHitRepository extends BaseApiHitRepository {
     }
   }
 
-  async deleteOldHits(beforeDate) {
+  async deleteOldHits(beforeDate: Date) {
     try {
-      const result = await this.modal.deleteMany({
+      const result = await this.model.deleteMany({
         timestamp: { $lt: beforeDate }
       });
       logger.info(
         `Deleted ${result.deletedCount} old API hits : apiHitsRepository`
       );
       return result.deletedCount;
-    } catch (error) {}
+    } catch (error) {
+      logger.error("Error deleting old API hits : apiHitsRepository", error);
+      throw error;
+    }
   }
 }
 

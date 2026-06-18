@@ -1,14 +1,22 @@
 import logger from "../../../shared/config/logger.js";
 
+interface IApiHitRepository {
+  save(eventData: any): Promise<any>;
+  deleteOldHits(cutOffDate: any): Promise<any>;
+}
+interface IMetricsRepository {
+  upsertEndPointMetrics(metricsData: any): Promise<any>;
+}
+
 export default class ProcessorService {
-  constructor({ ApiHitRepository, MetricsRepository }) {
+  constructor(
+    private ApiHitRepository: IApiHitRepository,
+    private MetricsRepository: IMetricsRepository
+  ) {
     if (!ApiHitRepository)
       throw new Error("processor required ApiHitRepository");
     if (!MetricsRepository)
       throw new Error("processor required MetricsRepository");
-
-    this.ApiHitRepository = ApiHitRepository;
-    this.MetricsRepository = MetricsRepository;
   }
 
   getTimeBucket(timeBucket, interval = "hour") {
@@ -55,7 +63,7 @@ export default class ProcessorService {
     }
   }
 
-  async processEvent(eventData) {
+  async processEvent(eventData: any) {
     let rawEventSaved = false; // depends on eventually consistency
 
     try {
@@ -84,7 +92,7 @@ export default class ProcessorService {
       logger.info("processedData saved in postgres DB: processorSErvice", {
         eventId: eventData.eventId
       });
-    } catch (error) {
+    } catch (error: any) {
       if (!rawEventSaved) {
         logger.error(
           "critical: Failed to save data into mongoDB: processorService",

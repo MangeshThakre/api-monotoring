@@ -11,7 +11,6 @@ import {
 import { CircuitBreaker } from "../../shared/events/producer/CircuitBreaker.js";
 import { EVENTS_TYPES } from "../../shared/events/eventContracts.js";
 import processorContainer from "./dependencies/Dependencies.js";
-import { response } from "express";
 
 const messageSchema = z.object({
   type: z.enum([EVENTS_TYPES.API_HIT]),
@@ -21,9 +20,9 @@ const messageSchema = z.object({
 });
 
 class EventConsumer {
-  constructor({
+  constructor( {
     processorService,
-    rabbitmq,
+    rabbitmq ,
     postgres,
     mongodb,
     config,
@@ -31,7 +30,7 @@ class EventConsumer {
     retryStrategy,
     isRetryable,
     circuitBreaker
-  }) {
+  }: any) {
     this._processorService = processorService;
     this._rabbitmq = rabbitmq;
     this._postgres = postgres;

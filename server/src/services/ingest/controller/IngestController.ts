@@ -1,25 +1,30 @@
 import logger from "../../../shared/config/logger.js";
 import ResponseFormatter from "../../../shared/utils/ResponseFormatter.js";
-class IngestController {
-  constructor(IngestService) {
-    if (!IngestService) throw new Error("IngestService is required");
+import { Request, Response, NextFunction } from "express";
+import { IApiHit } from "../../../shared/models/ApiHits.js";
 
-    this.IngestService = IngestService;
+interface IIngestService {
+  ingestApiHit(hitData: Partial<IApiHit>): Promise<IApiHit>;
+}
+
+class IngestController {
+  constructor(private IngestService: IIngestService) {
+    if (!IngestService) throw new Error("IngestService is required");
   }
 
-  async ingestApiHit(req, res, next) {
+  async ingestApiHit(req: Request, res: Response, next: NextFunction) {
     try {
-      const hitData = {
+      const hitData: Partial<IApiHit> = {
         ...req.body,
-        clientId: req.client._id,
-        apiKeyId: req.apiKey._id,
-        ip: req.ip || req.connection.remoteAddress,
+        clientId: req.clientId,
+        apiKeyId: req.apiKeyId,
+        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
         userAgent: req.headers["user-agent"] || ""
       };
 
       const result = await this.IngestService.ingestApiHit(hitData);
       res.status(201).json(ResponseFormatter.success(result));
-    } catch (error) {
+    } catch (error: any) {
       logger.error("Error in IngestController.ingestApiHit:", error);
       console.log(error);
       res

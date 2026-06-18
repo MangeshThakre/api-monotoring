@@ -11,7 +11,7 @@ interface IClientService {
     adminUser: any
   ): Promise<any>;
   createApiKey(clientId: string, apiKeyData: any, adminUser: any): Promise<any>;
-  getClientApikey(clientId: string): Promise<any>;
+  getClientApikeys(clientId: string): Promise<any>;
 }
 
 interface IAuthService {
@@ -108,14 +108,14 @@ export default class ClientController {
     }
   }
 
-  async getClientApiKey(
+  async getClientApiKeys(
     req: Request<IParams>,
     res: Response,
     next: NextFunction
   ) {
     try {
       const { clientId } = req.params;
-      const apiKey = await this.ClientService.getClientApikey(clientId);
+      const apiKey = await this.ClientService.getClientApikeys(clientId);
       return res
         .status(200)
         .json(ResponseFormatter.success(apiKey, "Successfully get api keys"));

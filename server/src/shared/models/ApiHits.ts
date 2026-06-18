@@ -5,7 +5,7 @@ import { Schema, model } from "mongoose";
  * Stores every individual API call
  */
 
-interface IApiHit {
+export interface IApiHit {
   eventId: string;
   timestamp: Date;
   serviceName: string;

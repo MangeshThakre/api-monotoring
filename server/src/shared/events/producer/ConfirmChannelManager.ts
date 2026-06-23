@@ -1,7 +1,14 @@
 import { EventEmitter } from "node:events";
 
 export class ConfirmChannelManager extends EventEmitter {
-  constructor({ rabbitmq, logger }) {
+  private rabbitmq: any;
+  private logger: any;
+
+  private _channel: any;
+  private _connecting: boolean;
+  private _connectWaiting: any;
+
+  constructor({ rabbitmq, logger }: { rabbitmq: any; logger: any }) {
     super();
 
     if (!rabbitmq) {
@@ -10,8 +17,8 @@ export class ConfirmChannelManager extends EventEmitter {
       );
     }
 
-    this._rabbitmq = rabbitmq;
-    this._logger = logger ?? console;
+    this.rabbitmq = rabbitmq;
+    this.logger = logger ?? console;
     this._channel = null;
     this._connecting = false;
     this._connectWaiting = [];
@@ -33,15 +40,15 @@ export class ConfirmChannelManager extends EventEmitter {
     try {
       let connection;
 
-      if (this._rabbitmq.connection) {
-        connection = this._rabbitmq.connection;
+      if (this.rabbitmq.connection) {
+        connection = this.rabbitmq.connection;
       } else {
-        await this._rabbitmq.connect();
+        await this.rabbitmq.connect();
 
-        if (!this._rabbitmq.connection) {
+        if (!this.rabbitmq.connection) {
           throw new Error("failed to obtain rabbitmq new connection");
         }
-        connection = this._rabbitmq.connection;
+        connection = this.rabbitmq.connection;
       }
 
       const confirmChannel = await connection.createConfirmChannel();
@@ -49,13 +56,13 @@ export class ConfirmChannelManager extends EventEmitter {
       confirmChannel.on("drain", () => this.emit("drain"));
 
       confirmChannel.on("close", () => {
-        this._logger.warn(
+        this.logger.warn(
           "[channelManager] confirm channel closed unexpectedly"
         );
         this._channel = null;
       });
-      confirmChannel.on("error", (error) => {
-        this._logger.warn(
+      confirmChannel.on("error", (error: any) => {
+        this.logger.warn(
           "[channelManager] confirm channel closed unexpectedly",
           { error: error.msg, stack: error.stack, code: error.code }
         );
@@ -65,7 +72,7 @@ export class ConfirmChannelManager extends EventEmitter {
       });
 
       this._channel = confirmChannel;
-      this._logger.info("[channelManager] confirm channel ready");
+      this.logger.info("[channelManager] confirm channel ready");
       for (const w of this._connectWaiting) {
         w.resolve(confirmChannel);
       }

@@ -10,28 +10,48 @@ export const CircuitState = Object.freeze({
 });
 
 /**
- * A simple implementation of the Circuit Breaker pattern in JavaScript. This class allows you to wrap calls to external services and automatically handle failures by opening the circuit after a certain number of consecutive failures, and then allowing a limited number of test requests after a cooldown period to determine if the service has recovered.
+ * A simple implementation of the Circuit Breaker pattern in JavaScript. This class allows you to wrap calls to external services and automatically handle failures by opening the circuit after a certain number of consecutive failures, and then allowing a limited number of test requests after a coolDown period to determine if the service has recovered.
  *
  * Usage:
- * const circuitBreaker = new CircuitBreaker({ failureThreshold: 5, cooldownMs: 30000 }
+ * const circuitBreaker = new CircuitBreaker({ failureThreshold: 5, coolDownMs: 30000 }
  * circuitBreaker.allowRequest() // returns true if request is allowed, false if circuit is open
  * circuitBreaker.onSuccess() // call this when a request succeeds
  * circuitBreaker.onFailure() // call this when a request fails
  *
  * The circuit breaker will automatically transition between states (CLOSED, OPEN, HALF_OPEN) based on the success and failure of requests, and will log state changes and metrics for monitoring purposes.
  */
+
+interface ICircuitBreakerOptions {
+  failureThreshold?: number;
+  coolDownMs?: number;
+  halfOpenMaxAttempts?: number;
+  logger?: any;
+}
+
 export class CircuitBreaker {
   /**
    * Creates a new CircuitBreaker instance with the specified options.
    * @param {Object} opts - Configuration options for the circuit breaker.
    * @param {number} [opts.failureThreshold=5] - The number of consecutive failures before opening the circuit.
-   * @param {number} [opts.cooldownMs=30000] - The cooldown period in milliseconds before allowing a test request.
+   * @param {number} [opts.coolDownMs=30000] - The cooldown period in milliseconds before allowing a test request.
    * @param {number} [opts.halfOpenMaxAttempts=3] - The maximum number of test requests allowed in the HALF_OPEN state.
    * @param {Object} [opts.logger=console] - The logger to use for logging circuit breaker events.
    */
-  constructor(opts = {}) {
+
+  private failureThreshold: number;
+  private coolDownMs: number;
+  private halfOpenMaxAttempts: number;
+  private logger: any;
+
+  private _state: string;
+  private _failures: number;
+  private _lastFailureTime: number;
+  private _halfOpenAttempts: number;
+  private _halfOpenSuccesses: number;
+
+  constructor(opts: ICircuitBreakerOptions = {}) {
     this.failureThreshold = opts.failureThreshold ?? 5;
-    this.cooldownMs = opts.cooldownMs ?? 30_000;
+    this.coolDownMs = opts.coolDownMs ?? 30_000;
     this.halfOpenMaxAttempts = opts.halfOpenMaxAttempts ?? 3;
     this.logger = opts.logger ?? console;
 
@@ -49,7 +69,7 @@ export class CircuitBreaker {
    * @returns {boolean} True if the cooldown period has elapsed, false otherwise.
    */
   _cooldownElapsed() {
-    return Date.now() - this._lastFailureTime >= this.cooldownMs;
+    return Date.now() - this._lastFailureTime >= this.coolDownMs;
   }
 
   /**
@@ -57,7 +77,7 @@ export class CircuitBreaker {
    * @param {CircuitState} newState - The new state to transition to.
    * @private
    */
-  _transitionTo(newState) {
+  _transitionTo(newState: string) {
     const prev = this._state;
     this._state = newState;
 
@@ -79,7 +99,7 @@ export class CircuitBreaker {
     this._transitionTo(CircuitState.OPEN);
     this.logger.error("[CircuitBreaker] OPEN", {
       failures: this._failures,
-      cooldownMs: this.cooldownMs
+      coolDownMs: this.coolDownMs
     });
   }
 
@@ -99,7 +119,7 @@ export class CircuitBreaker {
    * Gets the current state of the circuit breaker.
    * @returns {CircuitState} The current state of the circuit breaker.
    */
-  get state() {
+  state() {
     if (this._state === CircuitState.OPEN && this._cooldownElapsed()) {
       this._transitionTo(CircuitState.HALF_OPEN);
     }
@@ -112,7 +132,7 @@ export class CircuitBreaker {
    * @returns {boolean} True if the request is allowed, false otherwise.
    */
   allowRequest() {
-    const current = this.state;
+    const current = this.state();
 
     this.logger.debug("[CircuitBreaker] allowRequest check", {
       state: current,
@@ -212,14 +232,15 @@ export class CircuitBreaker {
    * @returns {{state: string, failures: number, lastFailureTime: number, halfOpenAttempts: number, halfOpenSuccesses: number, cooldownMs: number, failureThreshold: number}} The snapshot of the circuit breaker state.
    * @private
    */
+
   snapshot() {
     return {
-      state: this.state,
+      state: this.state(),
       failures: this._failures,
       lastFailureTime: this._lastFailureTime,
       halfOpenAttempts: this._halfOpenAttempts,
       halfOpenSuccesses: this._halfOpenSuccesses,
-      cooldownMs: this.cooldownMs,
+      coolDownMs: this.coolDownMs,
       failureThreshold: this.failureThreshold
     };
   }

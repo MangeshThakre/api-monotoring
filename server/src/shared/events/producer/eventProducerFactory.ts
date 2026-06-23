@@ -1,5 +1,4 @@
 import config from "../../config/index.js";
-import logger from "../../config/logger.js";
 import rabbitmq from "../../config/rabbitmq.js";
 
 import { EventProducer } from "./eventProducer.js";
@@ -7,7 +6,18 @@ import { CircuitBreaker } from "./CircuitBreaker.js";
 import { ConfirmChannelManager } from "./ConfirmChannelManager.js";
 import { RetryStrategy } from "./RetryStrategy.js";
 
-export default function eventProducerFactory(overrides = {}) {
+interface IEventProducerFactoryOverrides {
+  logger?: any;
+  queueName?: string;
+  rabbitmq?: typeof rabbitmq;
+  channelManager?: ConfirmChannelManager;
+  circuitBreaker?: CircuitBreaker;
+  retryStrategy?: RetryStrategy;
+}
+
+export default function eventProducerFactory(
+  overrides: IEventProducerFactoryOverrides = {}
+) {
   const log = overrides.logger ?? console;
   const queueName = overrides.queueName ?? config.rabbitmq.queue;
   const rmq = overrides.rabbitmq ?? rabbitmq;
@@ -20,7 +30,7 @@ export default function eventProducerFactory(overrides = {}) {
   if (!queueName) {
     throw new Error("Queue name is required for EventProducerFactory");
   }
-  if (!config.rabbitmq.retryAttempts || !config.rabbitmq.retryAttempts < 0) {
+  if (config.rabbitmq.retryAttempts < 0) {
     throw new Error(
       "Invalid retryAttempts configuration for EventProducerFactory"
     );
@@ -37,7 +47,7 @@ export default function eventProducerFactory(overrides = {}) {
     overrides.circuitBreaker ??
     new CircuitBreaker({
       failureThreshold: 5,
-      cooldownMs: 30_000,
+      coolDownMs: 30_000,
       halfOpenMaxAttempts: 3,
       logger: log
     });
@@ -51,11 +61,11 @@ export default function eventProducerFactory(overrides = {}) {
       jitterFactor: 0.3
     });
 
-  return new EventProducer({
+  return new EventProducer(
     channelManager,
     circuitBreaker,
     retryStrategy,
-    logger: log,
+    log,
     queueName
-  });
+  );
 }

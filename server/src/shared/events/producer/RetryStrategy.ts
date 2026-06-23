@@ -19,7 +19,7 @@ const RETRYABLE_PATTERNS = [
  * @param {*} err - The error object to check.
  * @returns {boolean} - True if the error is retryable, false otherwise.
  */
-export function isRetryable(err) {
+export function isRetryable(err: any) {
   if (!err) {
     return false;
   }
@@ -44,8 +44,21 @@ export function isRetryable(err) {
  * @param {number} [opts.maxDelayMs=5000] - Maximum delay in milliseconds for the exponential backoff.
  * @param {number} [opts.jitterFactor=0.3] - Jitter factor to randomize the delay.
  */
+
+interface RetryStrategyOptions {
+  maxRetries?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+  jitterFactor?: number;
+}
+
 export class RetryStrategy {
-  constructor(opts = {}) {
+  private maxRetries;
+  private baseDelayMs;
+  private maxDelayMs;
+  private jitterFactor;
+
+  constructor(opts: RetryStrategyOptions = {}) {
     this.maxRetries = opts.maxRetries ?? 3;
     this.baseDelayMs = opts.baseDelayMs ?? 200;
     this.maxDelayMs = opts.maxDelayMs ?? 5000;
@@ -57,7 +70,7 @@ export class RetryStrategy {
    * @param {number} attempt - The current attempt count.
    * @returns {boolean} - True if another retry attempt should be made, false otherwise.
    */
-  shouldRetry(attempt) {
+  shouldRetry(attempt: number) {
     return attempt < this.maxRetries;
   }
 
@@ -66,7 +79,7 @@ export class RetryStrategy {
    * @param {number} attempt - The current attempt count.
    * @returns {number} - The delay in milliseconds for the next retry attempt.
    */
-  delay(attempt) {
+  delay(attempt: number) {
     const exponential = this.baseDelayMs * Math.pow(2, attempt);
     const capped = Math.min(exponential, this.maxDelayMs);
 
@@ -81,7 +94,7 @@ export class RetryStrategy {
    * @param {number} attempt - The current attempt count.
    * @returns {Promise<void>} - Resolves after the delay for the next retry attempt.
    */
-  wait(attempt) {
+  wait(attempt: number) {
     const ms = this.delay(attempt);
     return new Promise((resolve) => setTimeout(resolve, ms));
   }

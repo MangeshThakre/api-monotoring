@@ -20,6 +20,7 @@ const messageSchema = z.object({
 });
 
 class EventConsumer {
+
   constructor({
     processorService,
     rabbitmq,

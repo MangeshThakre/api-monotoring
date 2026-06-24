@@ -1,6 +1,7 @@
 import logger from "../../../shared/config/logger.js";
 import AppError from "../../../shared/utils/AppError.js";
 import { v4 as uuidv4 } from "uuid";
+import { IApiHit } from "../../../shared/models/ApiHits.js";
 
 class IngestService {
   constructor(private eventProducer: any) {
@@ -51,7 +52,7 @@ class IngestService {
     }
   }
 
-  async ingestApiHit(hitData: any) {
+  async ingestApiHit(hitData: Partial<IApiHit>) {
     try {
       this.validateHitData(hitData);
 

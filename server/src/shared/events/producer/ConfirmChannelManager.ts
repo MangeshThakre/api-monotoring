@@ -24,7 +24,7 @@ export class ConfirmChannelManager extends EventEmitter {
     this._connectWaiting = [];
   }
 
-  async getGetChannel() {
+  async getChannel() {
     if (this._channel) return this._channel;
     if (this._connecting) {
       return new Promise((resolve, reject) => {

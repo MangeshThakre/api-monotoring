@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { IApiHit } from "../../../shared/models/ApiHits.js";
 
 interface IIngestService {
-  ingestApiHit(hitData: Partial<IApiHit>): Promise<IApiHit>;
+  ingestApiHit(hitData: Partial<IApiHit>): any;
 }
 
 class IngestController {
@@ -23,10 +23,11 @@ class IngestController {
       };
 
       const result = await this.IngestService.ingestApiHit(hitData);
+
       res.status(201).json(ResponseFormatter.success(result));
     } catch (error: any) {
       logger.error("Error in IngestController.ingestApiHit:", error);
-      console.log(error);
+      console.log("error", error);
       res
         .status(400)
         .json(ResponseFormatter.error(error.message, error.statusCode || 500));

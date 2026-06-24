@@ -36,13 +36,14 @@ export default function eventProducerFactory(
     );
   }
 
+  // Resolves Channel Manager: uses provided override (for testing) or creates a fresh instance for connection handling
   const channelManager =
     overrides.channelManager ??
     new ConfirmChannelManager({
       rabbitmq: rmq,
       logger: log
     });
-
+  // Resolves Circuit Breaker: safeguards the broker by halting traffic after 5 failures, cooling down for 30s, and testing with 3 probes
   const circuitBreaker =
     overrides.circuitBreaker ??
     new CircuitBreaker({
@@ -52,6 +53,7 @@ export default function eventProducerFactory(
       logger: log
     });
 
+  // Resolves Retry Strategy: manages transient failures using exponential backoff (up to 3 retries, max 5s delay) with 30% random jitter
   const retryStrategy =
     overrides.retryStrategy ??
     new RetryStrategy({
@@ -61,11 +63,14 @@ export default function eventProducerFactory(
       jitterFactor: 0.3
     });
 
+  // Message sender that formats data events and safely delivers them to a RabbitMQ queue,
+  // using a circuit breaker and retry logic to prevent data loss during network hiccups.
+
   return new EventProducer(
-    channelManager,
-    circuitBreaker,
-    retryStrategy,
-    log,
-    queueName
+    channelManager, // The connection to RabbitMQ
+    circuitBreaker, // The safety switch to prevent overloads
+    retryStrategy, // The rules for resending failed messages
+    log, // The logger for tracking what happens
+    queueName // The specific queue where messages should go
   );
 }
